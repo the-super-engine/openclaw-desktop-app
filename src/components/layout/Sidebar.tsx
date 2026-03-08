@@ -1,7 +1,5 @@
 /**
- * Sidebar Component
- * Navigation sidebar with menu items.
- * No longer fixed - sits inside the flex layout below the title bar.
+ * Sidebar - Enterprise navigation with active indicator
  */
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -18,6 +16,7 @@ import {
   ExternalLink,
   Trash2,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useSettingsStore } from '@/stores/settings';
 import { useChatStore } from '@/stores/chat';
@@ -51,23 +50,34 @@ function NavItem({ to, icon, label, badge, collapsed, onClick }: NavItemProps) {
       onClick={onClick}
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-          'hover:bg-accent hover:text-accent-foreground',
+          'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium',
+          'transition-all duration-200 ease-out',
+          collapsed ? 'justify-center px-2' : '',
           isActive
-            ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground',
-          collapsed && 'justify-center px-2'
+            ? 'bg-primary/10 text-primary shadow-sm'
+            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
         )
       }
     >
-      {icon}
-      {!collapsed && (
+      {({ isActive }) => (
         <>
-          <span className="flex-1">{label}</span>
-          {badge && (
-            <Badge variant="secondary" className="ml-auto">
-              {badge}
-            </Badge>
+          <span
+            className={cn(
+              'flex shrink-0 transition-colors duration-200',
+              isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+            )}
+          >
+            {icon}
+          </span>
+          {!collapsed && (
+            <>
+              <span className="flex-1">{label}</span>
+              {badge && (
+                <Badge variant="secondary" className="ml-auto text-xs">
+                  {badge}
+                </Badge>
+              )}
+            </>
           )}
         </>
       )}
@@ -77,22 +87,17 @@ function NavItem({ to, icon, label, badge, collapsed, onClick }: NavItemProps) {
 
 function getSessionBucket(activityMs: number, nowMs: number): SessionBucketKey {
   if (!activityMs || activityMs <= 0) return 'older';
-
   const now = new Date(nowMs);
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
-
   if (activityMs >= startOfToday) return 'today';
   if (activityMs >= startOfYesterday) return 'yesterday';
-
   const daysAgo = (startOfToday - activityMs) / (24 * 60 * 60 * 1000);
   if (daysAgo <= 7) return 'withinWeek';
   if (daysAgo <= 14) return 'withinTwoWeeks';
   if (daysAgo <= 30) return 'withinMonth';
   return 'older';
 }
-
-const INITIAL_NOW_MS = Date.now();
 
 export function Sidebar() {
   const sidebarCollapsed = useSettingsStore((state) => state.sidebarCollapsed);
@@ -122,24 +127,21 @@ export function Sidebar() {
       };
       if (result.success && result.url) {
         window.electron.openExternal(result.url);
-      } else {
-        console.error('Failed to get Dev Console URL:', result.error);
       }
-    } catch (err) {
-      console.error('Error opening Dev Console:', err);
+    } catch {
+      // ignore
     }
   };
 
   const { t } = useTranslation(['common', 'chat']);
   const [sessionToDelete, setSessionToDelete] = useState<{ key: string; label: string } | null>(null);
-  const [nowMs, setNowMs] = useState(INITIAL_NOW_MS);
+  const [nowMs, setNowMs] = useState(Date.now());
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setNowMs(Date.now());
-    }, 60 * 1000);
+    const timer = window.setInterval(() => setNowMs(Date.now()), 60 * 1000);
     return () => window.clearInterval(timer);
   }, []);
+
   const sessionBuckets: Array<{ key: SessionBucketKey; label: string; sessions: typeof sessions }> = [
     { key: 'today', label: t('chat:historyBuckets.today'), sessions: [] },
     { key: 'yesterday', label: t('chat:historyBuckets.yesterday'), sessions: [] },
@@ -148,36 +150,33 @@ export function Sidebar() {
     { key: 'withinMonth', label: t('chat:historyBuckets.withinMonth'), sessions: [] },
     { key: 'older', label: t('chat:historyBuckets.older'), sessions: [] },
   ];
-  const sessionBucketMap = Object.fromEntries(sessionBuckets.map((bucket) => [bucket.key, bucket])) as Record<
-    SessionBucketKey,
-    (typeof sessionBuckets)[number]
-  >;
+  const sessionBucketMap = Object.fromEntries(
+    sessionBuckets.map((b) => [b.key, b])
+  ) as Record<SessionBucketKey, (typeof sessionBuckets)[number]>;
 
-  for (const session of [...sessions].sort((a, b) =>
-    (sessionLastActivity[b.key] ?? 0) - (sessionLastActivity[a.key] ?? 0)
+  for (const session of [...sessions].sort(
+    (a, b) => (sessionLastActivity[b.key] ?? 0) - (sessionLastActivity[a.key] ?? 0)
   )) {
     const bucketKey = getSessionBucket(sessionLastActivity[session.key] ?? 0, nowMs);
     sessionBucketMap[bucketKey].sessions.push(session);
   }
 
   const navItems = [
-    { to: '/cron', icon: <Clock className="h-5 w-5" />, label: t('sidebar.cronTasks') },
-    { to: '/skills', icon: <Puzzle className="h-5 w-5" />, label: t('sidebar.skills') },
-    { to: '/channels', icon: <Radio className="h-5 w-5" />, label: t('sidebar.channels') },
-    { to: '/dashboard', icon: <Home className="h-5 w-5" />, label: t('sidebar.dashboard') },
-    { to: '/settings', icon: <Settings className="h-5 w-5" />, label: t('sidebar.settings') },
+    { to: '/cron', icon: <Clock className="h-[18px] w-[18px]" />, label: t('sidebar.cronTasks') },
+    { to: '/skills', icon: <Puzzle className="h-[18px] w-[18px]" />, label: t('sidebar.skills') },
+    { to: '/channels', icon: <Radio className="h-[18px] w-[18px]" />, label: t('sidebar.channels') },
+    { to: '/dashboard', icon: <Home className="h-[18px] w-[18px]" />, label: t('sidebar.dashboard') },
+    { to: '/settings', icon: <Settings className="h-[18px] w-[18px]" />, label: t('sidebar.settings') },
   ];
 
   return (
-    <aside
-      className={cn(
-        'flex shrink-0 flex-col border-r bg-background transition-all duration-300',
-        sidebarCollapsed ? 'w-16' : 'w-64'
-      )}
+    <motion.aside
+      initial={false}
+      animate={{ width: sidebarCollapsed ? 72 : 260 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="flex shrink-0 flex-col border-r border-border/60 bg-card/50"
     >
-      {/* Navigation */}
-      <nav className="flex-1 overflow-hidden flex flex-col p-2 gap-1">
-        {/* Chat nav item: acts as "New Chat" button, never highlighted as active */}
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-hidden p-3">
         <button
           onClick={() => {
             const { messages } = useChatStore.getState();
@@ -185,42 +184,47 @@ export function Sidebar() {
             navigate('/');
           }}
           className={cn(
-            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-            'hover:bg-accent hover:text-accent-foreground text-muted-foreground',
-            sidebarCollapsed && 'justify-center px-2',
+            'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium',
+            'text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200',
+            sidebarCollapsed && 'justify-center px-2'
           )}
         >
-          <MessageSquare className="h-5 w-5 shrink-0" />
+          <MessageSquare className="h-[18px] w-[18px] shrink-0" />
           {!sidebarCollapsed && <span className="flex-1 text-left">{t('sidebar.newChat')}</span>}
         </button>
 
-        {navItems.map((item) => (
-          <NavItem
+        {navItems.map((item, i) => (
+          <motion.div
             key={item.to}
-            {...item}
-            collapsed={sidebarCollapsed}
-          />
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.03, duration: 0.2 }}
+          >
+            <NavItem {...item} collapsed={sidebarCollapsed} />
+          </motion.div>
         ))}
 
-        {/* Session list — below Settings, only when expanded */}
         {!sidebarCollapsed && sessions.length > 0 && (
-          <div className="mt-1 overflow-y-auto max-h-72 space-y-0.5">
-            {sessionBuckets.map((bucket) => (
+          <div className="mt-2 max-h-64 space-y-0.5 overflow-y-auto">
+            {sessionBuckets.map((bucket) =>
               bucket.sessions.length > 0 ? (
                 <div key={bucket.key} className="pt-1">
-                  <div className="px-3 py-1 text-[11px] font-medium text-muted-foreground/80">
+                  <div className="px-3 py-1 text-[11px] font-medium text-muted-foreground/70">
                     {bucket.label}
                   </div>
                   {bucket.sessions.map((s) => (
                     <div key={s.key} className="group relative flex items-center">
                       <button
-                        onClick={() => { switchSession(s.key); navigate('/'); }}
+                        onClick={() => {
+                          switchSession(s.key);
+                          navigate('/');
+                        }}
                         className={cn(
-                          'w-full text-left rounded-md px-3 py-1.5 text-sm truncate transition-colors pr-7',
+                          'w-full text-left rounded-lg px-3 py-1.5 text-sm truncate pr-8 transition-all duration-200',
                           'hover:bg-accent hover:text-accent-foreground',
                           isOnChat && currentSessionKey === s.key
-                            ? 'bg-accent/60 text-accent-foreground font-medium'
-                            : 'text-muted-foreground',
+                            ? 'bg-accent/80 text-foreground font-medium'
+                            : 'text-muted-foreground'
                         )}
                       >
                         {getSessionLabel(s.key, s.displayName, s.label)}
@@ -234,11 +238,7 @@ export function Sidebar() {
                             label: getSessionLabel(s.key, s.displayName, s.label),
                           });
                         }}
-                        className={cn(
-                          'absolute right-1 flex items-center justify-center rounded p-0.5 transition-opacity',
-                          'opacity-0 group-hover:opacity-100',
-                          'text-muted-foreground hover:text-destructive hover:bg-destructive/10',
-                        )}
+                        className="absolute right-1 flex items-center justify-center rounded p-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -246,13 +246,12 @@ export function Sidebar() {
                   ))}
                 </div>
               ) : null
-            ))}
+            )}
           </div>
         )}
       </nav>
 
-      {/* Footer */}
-      <div className="p-2 space-y-2">
+      <div className="space-y-1 border-t border-border/60 p-3">
         {devModeUnlocked && !sidebarCollapsed && (
           <Button
             variant="ghost"
@@ -295,6 +294,6 @@ export function Sidebar() {
         }}
         onCancel={() => setSessionToDelete(null)}
       />
-    </aside>
+    </motion.aside>
   );
 }

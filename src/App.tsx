@@ -173,11 +173,15 @@ function App() {
           </Route>
         </Routes>
 
-        {/* Global toast notifications */}
         <Toaster
           position="bottom-right"
           richColors
           closeButton
+          toastOptions={{
+            classNames: {
+              toast: 'rounded-xl border border-border/80 shadow-card',
+            },
+          }}
           style={{ zIndex: 99999 }}
         />
       </TooltipProvider>

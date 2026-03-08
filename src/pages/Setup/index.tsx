@@ -46,33 +46,7 @@ const STEP = {
   COMPLETE: 4,
 } as const;
 
-const steps: SetupStep[] = [
-  {
-    id: 'welcome',
-    title: 'Welcome to ClawX',
-    description: 'Your AI assistant is ready to be configured',
-  },
-  {
-    id: 'runtime',
-    title: 'Environment Check',
-    description: 'Verifying system requirements',
-  },
-  {
-    id: 'provider',
-    title: 'AI Provider',
-    description: 'Configure your AI service',
-  },
-  {
-    id: 'installing',
-    title: 'Setting Up',
-    description: 'Installing essential components',
-  },
-  {
-    id: 'complete',
-    title: 'All Set!',
-    description: 'ClawX is ready to use',
-  },
-];
+const STEP_IDS = ['welcome', 'runtime', 'provider', 'installing', 'complete'] as const;
 
 // Default skills to auto-install (no additional API keys required)
 interface DefaultSkill {
@@ -98,9 +72,8 @@ import {
   shouldInvertInDark,
   shouldShowProviderModelId,
 } from '@/lib/providers';
-import clawxIcon from '@/assets/logo.svg';
+import appLogo from '@/assets/logo.svg';
 
-// Use the shared provider registry for setup providers
 const providers = SETUP_PROVIDERS;
 
 // NOTE: Channel types moved to Settings > Channels page
@@ -121,11 +94,11 @@ export function Setup() {
   const [runtimeChecksPassed, setRuntimeChecksPassed] = useState(false);
 
   const safeStepIndex = Number.isInteger(currentStep)
-    ? Math.min(Math.max(currentStep, STEP.WELCOME), steps.length - 1)
+    ? Math.min(Math.max(currentStep, STEP.WELCOME), STEP_IDS.length - 1)
     : STEP.WELCOME;
-  const step = steps[safeStepIndex] ?? steps[STEP.WELCOME];
+  const stepId = STEP_IDS[safeStepIndex] ?? 'welcome';
   const isFirstStep = safeStepIndex === STEP.WELCOME;
-  const isLastStep = safeStepIndex === steps.length - 1;
+  const isLastStep = safeStepIndex === STEP_IDS.length - 1;
 
   const markSetupComplete = useSettingsStore((state) => state.markSetupComplete);
 
@@ -193,32 +166,33 @@ export function Setup() {
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
       <TitleBar />
       <div className="flex-1 overflow-auto">
-        {/* Progress Indicator */}
-        <div className="flex justify-center pt-8">
-          <div className="flex items-center gap-2">
-            {steps.map((s, i) => (
-              <div key={s.id} className="flex items-center">
-                <div
+        <div className="flex justify-center pt-10 pb-4">
+          <div className="flex items-center gap-1">
+            {STEP_IDS.map((id, i) => (
+              <div key={id} className="flex items-center">
+                <motion.div
                   className={cn(
-                    'flex h-8 w-8 items-center justify-center rounded-full border-2 transition-colors',
+                    'flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-300',
                     i < safeStepIndex
-                      ? 'border-primary bg-primary text-primary-foreground'
+                      ? 'bg-primary text-primary-foreground shadow-md'
                       : i === safeStepIndex
-                        ? 'border-primary text-primary'
-                        : 'border-slate-600 text-slate-600'
+                        ? 'bg-primary/15 text-primary border border-primary/40 ring-2 ring-primary/20'
+                        : 'bg-muted text-muted-foreground'
                   )}
+                  initial={false}
+                  animate={{ scale: i === safeStepIndex ? 1.02 : 1 }}
                 >
                   {i < safeStepIndex ? (
                     <Check className="h-4 w-4" />
                   ) : (
-                    <span className="text-sm">{i + 1}</span>
+                    <span className="text-sm font-semibold">{i + 1}</span>
                   )}
-                </div>
-                {i < steps.length - 1 && (
+                </motion.div>
+                {i < STEP_IDS.length - 1 && (
                   <div
                     className={cn(
-                      'h-0.5 w-8 transition-colors',
-                      i < safeStepIndex ? 'bg-primary' : 'bg-slate-600'
+                      'h-0.5 w-6 mx-0.5 rounded-full transition-colors duration-300',
+                      i < safeStepIndex ? 'bg-primary' : 'bg-muted'
                     )}
                   />
                 )}
@@ -227,22 +201,21 @@ export function Setup() {
           </div>
         </div>
 
-        {/* Step Content */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={step.id}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="mx-auto max-w-2xl p-8"
+            key={stepId}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="mx-auto max-w-2xl px-8 pb-12"
           >
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2">{t(`steps.${step.id}.title`)}</h1>
-              <p className="text-slate-400">{t(`steps.${step.id}.description`)}</p>
+              <h1 className="text-2xl font-semibold tracking-tight mb-2">{t(`steps.${stepId}.title`)}</h1>
+              <p className="text-muted-foreground">{t(`steps.${stepId}.description`)}</p>
             </div>
 
-            {/* Step-specific content */}
-            <div className="rounded-xl bg-card text-card-foreground border shadow-sm p-8 mb-8">
+            <div className="rounded-xl bg-card text-card-foreground border border-border/80 shadow-card p-8 mb-8">
               {safeStepIndex === STEP.WELCOME && <WelcomeContent />}
               {safeStepIndex === STEP.RUNTIME && <RuntimeContent onStatusChange={setRuntimeChecksPassed} />}
               {safeStepIndex === STEP.PROVIDER && (
@@ -316,7 +289,14 @@ function WelcomeContent() {
   return (
     <div className="text-center space-y-4">
       <div className="mb-4 flex justify-center">
-        <img src={clawxIcon} alt="ClawX" className="h-16 w-16" />
+        <motion.img
+          src={appLogo}
+          alt="OpenClaw"
+          className="h-16 w-16"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        />
       </div>
       <h2 className="text-xl font-semibold">{t('welcome.title')}</h2>
       <p className="text-muted-foreground">

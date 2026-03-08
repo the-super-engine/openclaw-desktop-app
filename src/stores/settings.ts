@@ -135,7 +135,7 @@ export const useSettingsStore = create<SettingsState>()(
       resetSettings: () => set(defaultSettings),
     }),
     {
-      name: 'clawx-settings',
+      name: 'openclaw-desktop-settings',
     }
   )
 );
