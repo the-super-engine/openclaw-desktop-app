@@ -137,7 +137,6 @@ nsis:
 # Linux Configuration
 linux:
   executableName: openclaw-desktop
-  packageName: openclaw-desktop
   extraResources:
     - from: resources/bin/linux-${arch}
       to: bin
