@@ -3,7 +3,7 @@
  */
 import { useState, useEffect } from 'react';
 import { Minus, Square, X } from 'lucide-react';
-import logoSvg from '@/assets/logo.svg';
+import appLogo from '@/assets/logo.png';
 import { invokeIpc } from '@/lib/api-client';
 
 const isMac = window.electron?.platform === 'darwin';
@@ -36,7 +36,7 @@ function WindowsTitleBar() {
   return (
     <div className="drag-region flex h-11 shrink-0 items-center justify-between border-b border-border/60 bg-background/95 backdrop-blur-sm px-4">
       <div className="no-drag flex items-center gap-3">
-        <img src={logoSvg} alt="OpenClaw" className="h-5 w-auto" />
+        <img src={appLogo} alt="开放龙虾宝-桌面版" className="h-5 w-auto" />
         <span className="text-sm font-medium text-foreground/90">
           开放龙虾宝-桌面版
         </span>

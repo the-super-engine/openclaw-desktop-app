@@ -1,45 +1,42 @@
-# OpenClaw Desktop Application Icons
+# 开放龙虾宝-桌面版 Application Icons
 
 This directory contains the application icons for all supported platforms.
 
-## Required Files
+## Source Files (Project Root)
+
+Place these in the **project root** for icon generation:
+
+| File | Purpose |
+|------|---------|
+| `App_Icon.png` | App icon source (dock, taskbar, installer) — generates .ico, .icns, Linux PNGs |
+| `Logo.png` | In-app logo (title bar, setup wizard) — copied to `src/assets/logo.png` |
+
+If `App_Icon.png` is missing, the script falls back to `icon.svg`. If `Logo.png` is missing, the logo is generated from the app icon.
+
+## Generated Files
 
 | File | Platform | Description |
 |------|----------|-------------|
-| `icon.svg` | Source | Vector source for all icons |
 | `icon.icns` | macOS | Apple Icon Image format |
 | `icon.ico` | Windows | Windows ICO format |
 | `icon.png` | All | 512x512 PNG fallback |
 | `16x16.png` - `512x512.png` | Linux | PNG set for Linux |
-| `tray-icon-template.svg` | Source | macOS tray icon template source |
-| `tray-icon-Template.png` | macOS | 22x22 status bar icon (note: "Template" suffix required) |
+| `tray-icon-Template.png` | macOS | 22x22 status bar icon |
+| `src/assets/logo.png` | In-app | Logo for title bar and setup wizard |
 
 ## Generating Icons
 
-### Using the Script
-
 ```bash
-# Make the script executable
-chmod +x scripts/generate-icons.sh
-
-# Run icon generation
-./scripts/generate-icons.sh
+pnpm icons
 ```
 
-### Prerequisites
+Or directly:
 
-**macOS:**
 ```bash
-brew install imagemagick librsvg
+zx scripts/generate-icons.mjs
 ```
 
-**Linux:**
-```bash
-apt install imagemagick librsvg2-bin
-```
-
-**Windows:**
-Install ImageMagick from https://imagemagick.org/
+Uses Node.js (sharp, png2icons) — no ImageMagick required.
 
 ### Manual Generation
 

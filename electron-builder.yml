@@ -77,7 +77,7 @@ mac:
   gatekeeperAssess: false
   entitlements: entitlements.mac.plist
   entitlementsInherit: entitlements.mac.plist
-  notarize: true
+  notarize: false  # 无需签名，CI 构建不进行公证
   extendInfo:
     NSMicrophoneUsageDescription: OpenClaw Desktop requires microphone access for voice features
     NSCameraUsageDescription: OpenClaw Desktop requires camera access for video features

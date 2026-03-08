@@ -72,7 +72,7 @@ import {
   shouldInvertInDark,
   shouldShowProviderModelId,
 } from '@/lib/providers';
-import appLogo from '@/assets/logo.svg';
+import appLogo from '@/assets/logo.png';
 
 const providers = SETUP_PROVIDERS;
 

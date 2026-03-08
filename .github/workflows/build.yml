@@ -1,0 +1,67 @@
+name: Build & Package
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: win
+          - os: macos-latest
+            platform: mac
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download uv binaries
+        shell: bash
+        run: |
+          case "${{ matrix.platform }}" in
+            mac)   pnpm run uv:download:mac ;;
+            win)   pnpm run uv:download:win ;;
+            linux) pnpm run uv:download:linux ;;
+          esac
+
+      - name: Generate icons
+        run: pnpm run icons
+
+      - name: Build & Package
+        shell: bash
+        run: |
+          case "${{ matrix.platform }}" in
+            mac)   pnpm run package:mac ;;
+            win)   pnpm run package:win ;;
+            linux) pnpm run package:linux ;;
+          esac
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-release
+          path: release/

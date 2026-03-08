@@ -10,13 +10,25 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const ICONS_DIR = path.join(PROJECT_ROOT, 'resources', 'icons');
+const APP_ICON_SOURCE = path.join(PROJECT_ROOT, 'App_Icon.png');
+const LOGO_SOURCE = path.join(PROJECT_ROOT, 'Logo.png');
 const SVG_SOURCE = path.join(ICONS_DIR, 'icon.svg');
+const LOGO_OUTPUT = path.join(PROJECT_ROOT, 'src', 'assets', 'logo.png');
 
-echo`🎨 Generating OpenClaw Desktop icons using Node.js...`;
+echo`🎨 Generating 开放龙虾宝-桌面版 icons...`;
 
-// Check if SVG source exists
-if (!fs.existsSync(SVG_SOURCE)) {
-  echo`❌ SVG source not found: ${SVG_SOURCE}`;
+// Resolve app icon source: prefer App_Icon.png from root, fallback to icon.svg
+let appIconSource = null;
+if (fs.existsSync(APP_ICON_SOURCE)) {
+  appIconSource = APP_ICON_SOURCE;
+  echo`  Using App_Icon.png from project root`;
+} else if (fs.existsSync(SVG_SOURCE)) {
+  appIconSource = SVG_SOURCE;
+  echo`  Using icon.svg (App_Icon.png not found in root)`;
+}
+
+if (!appIconSource) {
+  echo(chalk.red`❌ No icon source found. Place App_Icon.png in project root or ensure resources/icons/icon.svg exists.`);
   process.exit(1);
 }
 
@@ -25,10 +37,10 @@ await fs.ensureDir(ICONS_DIR);
 
 try {
   // 1. Generate Master PNG Buffer (1024x1024)
-  echo`  Processing SVG source...`;
-  const masterPngBuffer = await sharp(SVG_SOURCE)
+  echo`  Processing app icon source...`;
+  const masterPngBuffer = await sharp(appIconSource)
     .resize(1024, 1024)
-    .png() // Ensure it's PNG
+    .png()
     .toBuffer();
 
   // Save the main icon.png (typically 512x512 for Electron root icon)
@@ -91,7 +103,24 @@ try {
     echo`  ⚠️  tray-icon-template.svg not found, skipping tray icon generation`;
   }
 
-  echo`\n✨ Icon generation complete! Files located in: ${ICONS_DIR}`;
+  // 6. Copy Logo.png for in-app display
+  echo`\n🖼️  Processing in-app logo...`;
+  await fs.ensureDir(path.dirname(LOGO_OUTPUT));
+  if (fs.existsSync(LOGO_SOURCE)) {
+    await sharp(LOGO_SOURCE)
+      .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .png()
+      .toFile(LOGO_OUTPUT);
+    echo`  ✅ Created src/assets/logo.png from Logo.png`;
+  } else {
+    // Fallback: generate from app icon so in-app logo always exists
+    await sharp(masterPngBuffer)
+      .resize(512, 512)
+      .toFile(LOGO_OUTPUT);
+    echo`  ⚠️  Logo.png not found, generated logo.png from app icon`;
+  }
+
+  echo`\n✨ Icon generation complete! App icons: ${ICONS_DIR}, In-app logo: ${LOGO_OUTPUT}`;
 
 } catch (error) {
   echo(chalk.red`\n❌ Fatal Error: ${error.message}`);
