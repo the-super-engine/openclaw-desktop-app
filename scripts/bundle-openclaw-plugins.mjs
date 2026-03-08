@@ -22,9 +22,7 @@ const NODE_MODULES = path.join(ROOT, 'node_modules');
 
 // On Windows, pnpm virtual store paths can exceed MAX_PATH (260 chars).
 // Adding \\?\ prefix bypasses the limit for Win32 fs calls.
-// Node.js 18.17+ also handles this transparently when LongPathsEnabled=1,
-// but this is an extra safety net for build machines where the registry key
-// may not be set yet.
+// Note: fs.realpathSync with \\?\ prefix causes EISDIR on Windows CI; use raw path for realpathSync.
 function normWin(p) {
   if (process.platform !== 'win32') return p;
   if (p.startsWith('\\\\?\\')) return p;
@@ -81,7 +79,7 @@ function bundleOnePlugin({ npmName, pluginId }) {
     throw new Error(`Missing dependency "${npmName}". Run pnpm install first.`);
   }
 
-  const realPluginPath = fs.realpathSync(normWin(pkgPath));
+  const realPluginPath = fs.realpathSync(pkgPath);
   const outputDir = path.join(OUTPUT_ROOT, pluginId);
 
   echo`📦 Bundling plugin ${npmName} -> ${outputDir}`;
@@ -121,7 +119,7 @@ function bundleOnePlugin({ npmName, pluginId }) {
 
       let realPath;
       try {
-        realPath = fs.realpathSync(normWin(fullPath));
+        realPath = fs.realpathSync(fullPath);
       } catch {
         continue;
       }
