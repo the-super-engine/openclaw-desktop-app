@@ -1,8 +1,11 @@
 #!/bin/bash
 
-# Post-installation script for ClawX on Linux
+# Post-installation script for OpenClaw Desktop on Linux
 
 set -e
+
+# Install path: electron-builder uses /opt/${sanitizedProductName}, package name is openclaw-desktop
+INSTALL_PREFIX="/opt/openclaw-desktop"
 
 # Update desktop database
 if command -v update-desktop-database &> /dev/null; then
@@ -14,49 +17,51 @@ if command -v gtk-update-icon-cache &> /dev/null; then
     gtk-update-icon-cache -q /usr/share/icons/hicolor || true
 fi
 
-# Create symbolic link for ClawX app binary
-if [ -x /opt/ClawX/clawx ]; then
-    ln -sf /opt/ClawX/clawx /usr/local/bin/clawx 2>/dev/null || true
-fi
+# Create symbolic link for app binary (try common install paths)
+for prefix in "$INSTALL_PREFIX" "/opt/OpenClaw 桌面助手"; do
+    if [ -x "$prefix/openclaw-desktop" ]; then
+        ln -sf "$prefix/openclaw-desktop" /usr/local/bin/openclaw-desktop 2>/dev/null || true
+        break
+    fi
+done
 
 # Create symbolic link for openclaw CLI
-OPENCLAW_WRAPPER="/opt/ClawX/resources/cli/openclaw"
-if [ -f "$OPENCLAW_WRAPPER" ]; then
-    chmod +x "$OPENCLAW_WRAPPER" 2>/dev/null || true
-    ln -sf "$OPENCLAW_WRAPPER" /usr/local/bin/openclaw 2>/dev/null || true
-fi
-
-# Set chrome-sandbox permissions.
-# On systems without working user namespaces, the SUID bit is required.
-# On Ubuntu 24.04+, user namespaces are available but blocked by AppArmor;
-# we rely on the AppArmor profile below instead, so 0755 is correct there.
-if ! { [[ -L /proc/self/ns/user ]] && unshare --user true; }; then
-    # No user namespace support — fall back to SUID sandbox
-    chmod 4755 '/opt/ClawX/chrome-sandbox' || true
-else
-    chmod 0755 '/opt/ClawX/chrome-sandbox' || true
-fi
-
-# Install AppArmor profile (Ubuntu 24.04+).
-# Ubuntu 24.04 enables kernel.apparmor_restrict_unprivileged_userns=1 by default,
-# which blocks Electron's sandbox. The bundled AppArmor profile grants the 'userns'
-# permission so the app can create user namespaces without disabling the global policy.
-#
-# We first check if AppArmor is enabled and if the running version supports abi/4.0
-# (Ubuntu 22.04 does not; it runs fine without the profile, so we skip it there).
-if apparmor_status --enabled > /dev/null 2>&1; then
-    APPARMOR_PROFILE_SOURCE='/opt/ClawX/resources/apparmor-profile'
-    APPARMOR_PROFILE_TARGET='/etc/apparmor.d/clawx'
-    if apparmor_parser --skip-kernel-load --debug "$APPARMOR_PROFILE_SOURCE" > /dev/null 2>&1; then
-        cp -f "$APPARMOR_PROFILE_SOURCE" "$APPARMOR_PROFILE_TARGET"
-
-        # Skip live-loading in a chroot environment (e.g. image-building pipelines).
-        if ! { [ -x '/usr/bin/ischroot' ] && /usr/bin/ischroot; } && hash apparmor_parser 2>/dev/null; then
-            apparmor_parser --replace --write-cache --skip-read-cache "$APPARMOR_PROFILE_TARGET"
-        fi
-    else
-        echo "Skipping AppArmor profile installation: this version of AppArmor does not support the bundled profile"
+for prefix in "$INSTALL_PREFIX" "/opt/OpenClaw 桌面助手"; do
+    OPENCLAW_WRAPPER="$prefix/resources/cli/openclaw"
+    if [ -f "$OPENCLAW_WRAPPER" ]; then
+        chmod +x "$OPENCLAW_WRAPPER" 2>/dev/null || true
+        ln -sf "$OPENCLAW_WRAPPER" /usr/local/bin/openclaw 2>/dev/null || true
+        break
     fi
+done
+
+# Set chrome-sandbox permissions
+for prefix in "$INSTALL_PREFIX" "/opt/OpenClaw 桌面助手"; do
+    if [ -f "$prefix/chrome-sandbox" ]; then
+        if ! { [[ -L /proc/self/ns/user ]] && unshare --user true; }; then
+            chmod 4755 "$prefix/chrome-sandbox" 2>/dev/null || true
+        else
+            chmod 0755 "$prefix/chrome-sandbox" 2>/dev/null || true
+        fi
+        break
+    fi
+done
+
+# Install AppArmor profile (Ubuntu 24.04+)
+if apparmor_status --enabled > /dev/null 2>&1; then
+    for prefix in "$INSTALL_PREFIX" "/opt/OpenClaw 桌面助手"; do
+        APPARMOR_PROFILE_SOURCE="$prefix/resources/apparmor-profile"
+        if [ -f "$APPARMOR_PROFILE_SOURCE" ]; then
+            APPARMOR_PROFILE_TARGET='/etc/apparmor.d/openclaw-desktop'
+            if apparmor_parser --skip-kernel-load --debug "$APPARMOR_PROFILE_SOURCE" > /dev/null 2>&1; then
+                cp -f "$APPARMOR_PROFILE_SOURCE" "$APPARMOR_PROFILE_TARGET"
+                if ! { [ -x '/usr/bin/ischroot' ] && /usr/bin/ischroot; } && hash apparmor_parser 2>/dev/null; then
+                    apparmor_parser --replace --write-cache --skip-read-cache "$APPARMOR_PROFILE_TARGET"
+                fi
+            fi
+            break
+        fi
+    done
 fi
 
-echo "ClawX has been installed successfully."
+echo "OpenClaw Desktop has been installed successfully."

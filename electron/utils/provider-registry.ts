@@ -71,7 +71,7 @@ const REGISTRY: Record<string, ProviderBackendMeta> = {
       apiKeyEnv: 'OPENROUTER_API_KEY',
       headers: {
         'HTTP-Referer': 'https://claw-x.com',
-        'X-Title': 'ClawX',
+        'X-Title': 'OpenClaw-Desktop',
       },
     },
   },

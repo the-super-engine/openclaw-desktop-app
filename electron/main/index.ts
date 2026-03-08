@@ -14,7 +14,7 @@ import { logger } from '../utils/logger';
 import { warmupNetworkOptimization } from '../utils/uv-env';
 
 import { ClawHubService } from '../gateway/clawhub';
-import { ensureClawXContext, repairClawXOnlyBootstrapFiles } from '../utils/openclaw-workspace';
+import { ensureAppContext, repairAppContextOnlyBootstrapFiles } from '../utils/openclaw-workspace';
 import { autoInstallCliIfNeeded, generateCompletionCache, installCompletionToProfile } from '../utils/openclaw-cli';
 import { isQuitting, setQuitting } from './app-state';
 import { applyProxySettings } from './proxy';
@@ -38,11 +38,11 @@ import { ensureBuiltinSkillsInstalled } from '../utils/skill-config';
 app.disableHardwareAcceleration();
 
 // On Linux, set CHROME_DESKTOP so Chromium can find the correct .desktop file.
-// On Wayland this maps the running window to clawx.desktop (→ icon + app grouping);
+// On Wayland this maps the running window to openclaw-desktop.desktop (→ icon + app grouping);
 // on X11 it supplements the StartupWMClass matching.
 // Must be called before app.whenReady() / before any window is created.
 if (process.platform === 'linux') {
-  app.setDesktopName('clawx.desktop');
+  app.setDesktopName('openclaw-desktop.desktop');
 }
 
 // Prevent multiple instances of the app from running simultaneously.
@@ -139,7 +139,7 @@ function createWindow(): BrowserWindow {
 async function initialize(): Promise<void> {
   // Initialize logger first
   logger.init();
-  logger.info('=== ClawX Application Starting ===');
+  logger.info('=== OpenClaw Desktop Application Starting ===');
   logger.debug(
     `Runtime: platform=${process.platform}/${process.arch}, electron=${process.versions.electron}, node=${process.versions.node}, packaged=${app.isPackaged}`
   );
@@ -203,10 +203,10 @@ async function initialize(): Promise<void> {
     mainWindow = null;
   });
 
-  // Repair any bootstrap files that only contain ClawX markers (no OpenClaw
-  // template content). This fixes a race condition where ensureClawXContext()
+  // Repair any bootstrap files that only contain app markers (no OpenClaw
+  // template content). This fixes a race condition where ensureAppContext()
   // previously created the file before the gateway could seed the full template.
-  void repairClawXOnlyBootstrapFiles().catch((error) => {
+  void repairAppContextOnlyBootstrapFiles().catch((error) => {
     logger.warn('Failed to repair bootstrap files:', error);
   });
 
@@ -231,11 +231,11 @@ async function initialize(): Promise<void> {
     logger.info('Gateway auto-start disabled in settings');
   }
 
-  // Merge ClawX context snippets into the workspace bootstrap files.
+  // Merge app context snippets into the workspace bootstrap files.
   // The gateway seeds workspace files asynchronously after its HTTP server
-  // is ready, so ensureClawXContext will retry until the target files appear.
-  void ensureClawXContext().catch((error) => {
-    logger.warn('Failed to merge ClawX context into workspace:', error);
+  // is ready, so ensureAppContext will retry until the target files appear.
+  void ensureAppContext().catch((error) => {
+    logger.warn('Failed to merge app context into workspace:', error);
   });
 
   // Auto-install openclaw CLI and shell completions (non-blocking).
@@ -248,12 +248,12 @@ async function initialize(): Promise<void> {
     logger.warn('CLI auto-install failed:', error);
   });
 
-  // Re-apply ClawX context after every gateway restart because the gateway
-  // may re-seed workspace files with clean templates (losing ClawX markers).
+  // Re-apply app context after every gateway restart because the gateway
+  // may re-seed workspace files with clean templates (losing app markers).
   gatewayManager.on('status', (status: { state: string }) => {
     if (status.state === 'running') {
-      void ensureClawXContext().catch((error) => {
-        logger.warn('Failed to re-merge ClawX context after gateway reconnect:', error);
+      void ensureAppContext().catch((error) => {
+        logger.warn('Failed to re-merge app context after gateway reconnect:', error);
       });
     }
   });

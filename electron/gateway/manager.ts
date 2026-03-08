@@ -89,7 +89,7 @@ const DEFAULT_RECONNECT_CONFIG: ReconnectConfig = {
 /**
  * Ensure the gateway fetch-preload script exists in userData and return
  * its absolute path.  The script patches globalThis.fetch to inject
- * ClawX app-attribution headers (HTTP-Referer, X-Title) for OpenRouter
+ * App-attribution headers (HTTP-Referer, X-Title) for OpenRouter
  * API requests, overriding the OpenClaw runner's hardcoded defaults.
  *
  * Inlined here so it works in dev, packaged, and asar modes without
@@ -100,10 +100,10 @@ const GATEWAY_FETCH_PRELOAD_SOURCE = `'use strict';
 (function () {
   var _f = globalThis.fetch;
   if (typeof _f !== 'function') return;
-  if (globalThis.__clawxFetchPatched) return;
-  globalThis.__clawxFetchPatched = true;
+  if (globalThis.__openclawDesktopFetchPatched) return;
+  globalThis.__openclawDesktopFetchPatched = true;
 
-  globalThis.fetch = function clawxFetch(input, init) {
+  globalThis.fetch = function openclawDesktopFetch(input, init) {
     var url =
       typeof input === 'string' ? input
         : input && typeof input === 'object' && typeof input.url === 'string'
@@ -123,7 +123,7 @@ const GATEWAY_FETCH_PRELOAD_SOURCE = `'use strict';
       delete flat['x-title'];
       delete flat['X-Title'];
       flat['HTTP-Referer'] = 'https://claw-x.com';
-      flat['X-Title'] = 'ClawX';
+      flat['X-Title'] = 'OpenClaw-Desktop';
       init.headers = flat;
     }
     return _f.call(globalThis, input, init);
@@ -145,8 +145,8 @@ const GATEWAY_FETCH_PRELOAD_SOURCE = `'use strict';
   if (process.platform === 'win32') {
     try {
       var cp = require('child_process');
-      if (!cp.__clawxPatched) {
-        cp.__clawxPatched = true;
+      if (!cp.__openclawDesktopPatched) {
+        cp.__openclawDesktopPatched = true;
         ['spawn', 'exec', 'execFile', 'fork', 'spawnSync', 'execSync', 'execFileSync'].forEach(function(method) {
           var original = cp[method];
           if (typeof original !== 'function') return;
@@ -244,7 +244,7 @@ export class GatewayManager extends EventEmitter {
   private async initDeviceIdentity(): Promise<void> {
     if (this.deviceIdentity) return; // already loaded
     try {
-      const identityPath = path.join(app.getPath('userData'), 'clawx-device-identity.json');
+      const identityPath = path.join(app.getPath('userData'), 'openclaw-desktop-device-identity.json');
       this.deviceIdentity = await loadOrCreateDeviceIdentity(identityPath);
       logger.debug(`Device identity loaded (deviceId=${this.deviceIdentity.deviceId})`);
     } catch (err) {
@@ -1305,7 +1305,7 @@ export class GatewayManager extends EventEmitter {
         OPENCLAW_NO_RESPAWN: '1',
       };
 
-      // Inject fetch preload so OpenRouter requests carry ClawX headers.
+      // Inject fetch preload so OpenRouter requests carry app headers.
       // The preload patches globalThis.fetch before any module loads.
       // NODE_OPTIONS --require is blocked by Electron in packaged apps, so skip
       // this injection when packaged to avoid the "NODE_OPTIONs not supported"
@@ -1536,7 +1536,7 @@ export class GatewayManager extends EventEmitter {
             maxProtocol: 3,
             client: {
               id: clientId,
-              displayName: 'ClawX',
+              displayName: 'OpenClaw Desktop',
               version: '0.1.0',
               platform: process.platform,
               mode: clientMode,

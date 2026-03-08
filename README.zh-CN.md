@@ -1,6 +1,6 @@
 # OpenClaw 桌面助手
 
-基于 [ClawX](https://github.com/ValueCell-ai/ClawX) 的中国化版本，面向中国大陆用户的 OpenClaw AI 智能体图形界面。
+面向中国大陆用户的 OpenClaw AI 智能体图形界面。
 
 ## 特性
 
@@ -8,7 +8,7 @@
 - **推荐 DeepSeek**：DeepSeek 官方 API 作为推荐选项
 - **飞书优先**：飞书、钉钉等国内渠道优先展示
 - **中英双语**：默认简体中文，支持英文切换
-- **白蓝/黑蓝主题**：商业风格配色
+- **白蓝/黑蓝主题**：企业风格配色
 
 ## 开发
 
@@ -28,4 +28,4 @@ pnpm run package:linux  # Linux
 
 ## 致谢
 
-本项目基于 [ClawX](https://github.com/ValueCell-ai/ClawX) 开发，感谢 ValueCell-ai 团队。
+本项目参考 [ClawX](https://github.com/ValueCell-ai/ClawX) 开发，感谢 ValueCell-ai 团队。
