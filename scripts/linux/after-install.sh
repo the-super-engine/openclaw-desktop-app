@@ -18,7 +18,7 @@ if command -v gtk-update-icon-cache &> /dev/null; then
 fi
 
 # Create symbolic link for app binary (try common install paths)
-for prefix in "$INSTALL_PREFIX" "/opt/OpenClaw 桌面助手"; do
+for prefix in "$INSTALL_PREFIX" "/opt/开放龙虾宝-桌面版"; do
     if [ -x "$prefix/openclaw-desktop" ]; then
         ln -sf "$prefix/openclaw-desktop" /usr/local/bin/openclaw-desktop 2>/dev/null || true
         break
@@ -26,7 +26,7 @@ for prefix in "$INSTALL_PREFIX" "/opt/OpenClaw 桌面助手"; do
 done
 
 # Create symbolic link for openclaw CLI
-for prefix in "$INSTALL_PREFIX" "/opt/OpenClaw 桌面助手"; do
+for prefix in "$INSTALL_PREFIX" "/opt/开放龙虾宝-桌面版"; do
     OPENCLAW_WRAPPER="$prefix/resources/cli/openclaw"
     if [ -f "$OPENCLAW_WRAPPER" ]; then
         chmod +x "$OPENCLAW_WRAPPER" 2>/dev/null || true
@@ -36,7 +36,7 @@ for prefix in "$INSTALL_PREFIX" "/opt/OpenClaw 桌面助手"; do
 done
 
 # Set chrome-sandbox permissions
-for prefix in "$INSTALL_PREFIX" "/opt/OpenClaw 桌面助手"; do
+for prefix in "$INSTALL_PREFIX" "/opt/开放龙虾宝-桌面版"; do
     if [ -f "$prefix/chrome-sandbox" ]; then
         if ! { [[ -L /proc/self/ns/user ]] && unshare --user true; }; then
             chmod 4755 "$prefix/chrome-sandbox" 2>/dev/null || true
@@ -49,7 +49,7 @@ done
 
 # Install AppArmor profile (Ubuntu 24.04+)
 if apparmor_status --enabled > /dev/null 2>&1; then
-    for prefix in "$INSTALL_PREFIX" "/opt/OpenClaw 桌面助手"; do
+    for prefix in "$INSTALL_PREFIX" "/opt/开放龙虾宝-桌面版"; do
         APPARMOR_PROFILE_SOURCE="$prefix/resources/apparmor-profile"
         if [ -f "$APPARMOR_PROFILE_SOURCE" ]; then
             APPARMOR_PROFILE_TARGET='/etc/apparmor.d/openclaw-desktop'

@@ -1,6 +1,6 @@
 {
   "title": "设置",
-  "subtitle": "配置您的 OpenClaw 桌面助手",
+  "subtitle": "配置您的 开放龙虾宝-桌面版",
   "appearance": {
     "title": "外观",
     "description": "自定义外观和风格",
@@ -201,7 +201,7 @@
   },
   "about": {
     "title": "关于",
-    "appName": "OpenClaw 桌面助手",
+    "appName": "开放龙虾宝-桌面版",
     "tagline": "图形化 AI 助手",
     "basedOn": "基于 OpenClaw",
     "version": "版本 {{version}}",

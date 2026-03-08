@@ -651,7 +651,7 @@ export function createGatewayWsTransportInvoker(options: GatewayWsTransportOptio
         maxProtocol: 3,
         client: {
           id: 'openclaw-desktop-ui',
-          displayName: 'OpenClaw 桌面助手',
+          displayName: '开放龙虾宝-桌面版',
           version: '0.1.0',
           platform: window.electron?.platform ?? 'unknown',
           mode: 'ui',

@@ -38,7 +38,7 @@ function WindowsTitleBar() {
       <div className="no-drag flex items-center gap-3">
         <img src={logoSvg} alt="OpenClaw" className="h-5 w-auto" />
         <span className="text-sm font-medium text-foreground/90">
-          OpenClaw 桌面助手
+          开放龙虾宝-桌面版
         </span>
       </div>
 

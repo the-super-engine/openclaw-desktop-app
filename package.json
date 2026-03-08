@@ -11,7 +11,7 @@
             "sharp"
         ]
     },
-    "description": "OpenClaw 桌面助手 - 面向中国大陆用户的 AI 智能体图形界面，默认 Minimax，推荐 DeepSeek，飞书优先",
+    "description": "开放龙虾宝-桌面版 - 面向中国大陆用户的 AI 智能体图形界面，默认 Minimax，推荐 DeepSeek，飞书优先",
     "main": "dist-electron/main/index.js",
     "author": "OpenClaw Desktop",
     "license": "MIT",

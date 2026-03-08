@@ -1,6 +1,6 @@
 # OpenClaw Desktop
 
-OpenClaw 桌面助手 - 面向中国大陆用户的 OpenClaw AI 智能体图形界面。
+开放龙虾宝-桌面版 - 面向中国大陆用户的 OpenClaw AI 智能体图形界面。
 
 ## 特性
 
