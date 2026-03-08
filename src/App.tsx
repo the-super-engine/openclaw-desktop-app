@@ -1,115 +1,188 @@
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { motion, AnimatePresence } from 'framer-motion'
-import Welcome from './components/Welcome'
-import EnvCheck from './components/EnvCheck'
-import InstallStep from './components/InstallStep'
-import ConfigWizard from './components/ConfigWizard'
-import Done from './components/Done'
-import Header from './components/Header'
+/**
+ * Root Application Component
+ * Handles routing and global providers
+ */
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Component, useEffect } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
+import { Toaster } from 'sonner';
+import i18n from './i18n';
+import { MainLayout } from './components/layout/MainLayout';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { Dashboard } from './pages/Dashboard';
+import { Chat } from './pages/Chat';
+import { Channels } from './pages/Channels';
+import { Skills } from './pages/Skills';
+import { Cron } from './pages/Cron';
+import { Settings } from './pages/Settings';
+import { Setup } from './pages/Setup';
+import { useSettingsStore } from './stores/settings';
+import { useGatewayStore } from './stores/gateway';
+import { applyGatewayTransportPreference } from './lib/api-client';
 
-type Step = 'welcome' | 'env' | 'install' | 'config' | 'done'
 
-function App() {
-  const { i18n } = useTranslation()
-  const [step, setStep] = useState<Step>('welcome')
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme')
-    if (saved) return saved === 'dark'
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-  })
+/**
+ * Error Boundary to catch and display React rendering errors
+ */
+class ErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode)
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light')
-  }, [darkMode])
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
 
-  const handleNext = (nextStep?: Step) => {
-    if (nextStep) {
-      setStep(nextStep)
-    } else {
-      const order: Step[] = ['welcome', 'env', 'install', 'config', 'done']
-      const idx = order.indexOf(step)
-      if (idx < order.length - 1) setStep(order[idx + 1])
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('React Error Boundary caught error:', error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          padding: '40px',
+          color: '#f87171',
+          background: '#0f172a',
+          minHeight: '100vh',
+          fontFamily: 'monospace'
+        }}>
+          <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Something went wrong</h1>
+          <pre style={{
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all',
+            background: '#1e293b',
+            padding: '16px',
+            borderRadius: '8px',
+            fontSize: '14px'
+          }}>
+            {this.state.error?.message}
+            {'\n\n'}
+            {this.state.error?.stack}
+          </pre>
+          <button
+            onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload(); }}
+            style={{
+              marginTop: '16px',
+              padding: '8px 16px',
+              background: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            Reload
+          </button>
+        </div>
+      );
     }
+    return this.props.children;
   }
-
-  const handleBack = () => {
-    const order: Step[] = ['welcome', 'env', 'install', 'config', 'done']
-    const idx = order.indexOf(step)
-    if (idx > 0) setStep(order[idx - 1])
-  }
-
-  return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
-      <Header
-        step={step}
-        darkMode={darkMode}
-        onToggleTheme={() => setDarkMode(!darkMode)}
-        onLanguageChange={(lang) => i18n.changeLanguage(lang)}
-      />
-
-      <main className="flex-1 overflow-auto pt-16">
-        <AnimatePresence mode="wait">
-          {step === 'welcome' && (
-            <motion.div
-              key="welcome"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Welcome onNext={() => handleNext('env')} />
-            </motion.div>
-          )}
-          {step === 'env' && (
-            <motion.div
-              key="env"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <EnvCheck onNext={() => handleNext('install')} onBack={handleBack} />
-            </motion.div>
-          )}
-          {step === 'install' && (
-            <motion.div
-              key="install"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <InstallStep onNext={() => handleNext('config')} onBack={handleBack} />
-            </motion.div>
-          )}
-          {step === 'config' && (
-            <motion.div
-              key="config"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ConfigWizard onNext={() => handleNext('done')} onBack={handleBack} />
-            </motion.div>
-          )}
-          {step === 'done' && (
-            <motion.div
-              key="done"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Done onRestart={() => setStep('welcome')} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
-    </div>
-  )
 }
 
-export default App
+function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const initSettings = useSettingsStore((state) => state.init);
+  const theme = useSettingsStore((state) => state.theme);
+  const language = useSettingsStore((state) => state.language);
+  const gatewayTransportPreference = useSettingsStore((state) => state.gatewayTransportPreference);
+  const setupComplete = useSettingsStore((state) => state.setupComplete);
+  const initGateway = useGatewayStore((state) => state.init);
+
+  useEffect(() => {
+    initSettings();
+  }, [initSettings]);
+
+  // Sync i18n language with persisted settings on mount
+  useEffect(() => {
+    if (language && language !== i18n.language) {
+      i18n.changeLanguage(language);
+    }
+  }, [language]);
+
+  // Initialize Gateway connection on mount
+  useEffect(() => {
+    initGateway();
+  }, [initGateway]);
+
+  // Redirect to setup wizard if not complete
+  useEffect(() => {
+    if (!setupComplete && !location.pathname.startsWith('/setup')) {
+      navigate('/setup');
+    }
+  }, [setupComplete, location.pathname, navigate]);
+
+  // Listen for navigation events from main process
+  useEffect(() => {
+    const handleNavigate = (...args: unknown[]) => {
+      const path = args[0];
+      if (typeof path === 'string') {
+        navigate(path);
+      }
+    };
+
+    const unsubscribe = window.electron.ipcRenderer.on('navigate', handleNavigate);
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [navigate]);
+
+  // Apply theme
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(theme);
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    applyGatewayTransportPreference(gatewayTransportPreference);
+  }, [gatewayTransportPreference]);
+
+  return (
+    <ErrorBoundary>
+      <TooltipProvider delayDuration={300}>
+        <Routes>
+          {/* Setup wizard (shown on first launch) */}
+          <Route path="/setup/*" element={<Setup />} />
+
+          {/* Main application routes */}
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Chat />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/channels" element={<Channels />} />
+            <Route path="/skills" element={<Skills />} />
+            <Route path="/cron" element={<Cron />} />
+            <Route path="/settings/*" element={<Settings />} />
+          </Route>
+        </Routes>
+
+        {/* Global toast notifications */}
+        <Toaster
+          position="bottom-right"
+          richColors
+          closeButton
+          style={{ zIndex: 99999 }}
+        />
+      </TooltipProvider>
+    </ErrorBoundary>
+  );
+}
+
+export default App;

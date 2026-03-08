@@ -1,116 +1,91 @@
-import i18n from 'i18next'
-import { initReactI18next } from 'react-i18next'
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+// EN
+import enCommon from './locales/en/common.json';
+import enSettings from './locales/en/settings.json';
+import enDashboard from './locales/en/dashboard.json';
+import enChat from './locales/en/chat.json';
+import enChannels from './locales/en/channels.json';
+import enSkills from './locales/en/skills.json';
+import enCron from './locales/en/cron.json';
+import enSetup from './locales/en/setup.json';
+
+// ZH
+import zhCommon from './locales/zh/common.json';
+import zhSettings from './locales/zh/settings.json';
+import zhDashboard from './locales/zh/dashboard.json';
+import zhChat from './locales/zh/chat.json';
+import zhChannels from './locales/zh/channels.json';
+import zhSkills from './locales/zh/skills.json';
+import zhCron from './locales/zh/cron.json';
+import zhSetup from './locales/zh/setup.json';
+
+// JA
+import jaCommon from './locales/ja/common.json';
+import jaSettings from './locales/ja/settings.json';
+import jaDashboard from './locales/ja/dashboard.json';
+import jaChat from './locales/ja/chat.json';
+import jaChannels from './locales/ja/channels.json';
+import jaSkills from './locales/ja/skills.json';
+import jaCron from './locales/ja/cron.json';
+import jaSetup from './locales/ja/setup.json';
+
+export const SUPPORTED_LANGUAGES = [
+    { code: 'zh', label: '简体中文' },
+    { code: 'en', label: 'English' },
+    { code: 'ja', label: '日本語' },
+] as const;
+
+export type LanguageCode = (typeof SUPPORTED_LANGUAGES)[number]['code'];
 
 const resources = {
-  zh: {
-    translation: {
-      appName: 'OpenClaw 桌面助手',
-      welcome: '欢迎使用 OpenClaw',
-      welcomeDesc: '一键安装并配置 OpenClaw AI 智能体，支持 Minimax、DeepSeek 等国内模型，轻松接入飞书',
-      getStarted: '开始安装',
-      checkEnv: '环境检测',
-      installOpenClaw: '安装 OpenClaw',
-      configure: '配置向导',
-      done: '完成',
-      nodeRequired: '需要 Node.js 20+',
-      nodeInstalled: 'Node.js 已安装',
-      nodeNotInstalled: 'Node.js 未安装',
-      openclawInstalled: 'OpenClaw 已安装',
-      openclawNotInstalled: 'OpenClaw 未安装',
-      installNow: '立即安装',
-      skip: '跳过',
-      next: '下一步',
-      back: '上一步',
-      finish: '完成配置',
-      modelConfig: '模型配置',
-      defaultModel: '默认模型',
-      minimax: 'Minimax',
-      deepseek: 'DeepSeek',
-      recommended: '推荐',
-      apiKey: 'API Key',
-      enterApiKey: '请输入 API Key',
-      feishuConfig: '飞书配置',
-      feishuPriority: '飞书集成（优先配置）',
-      feishuDesc: '连接飞书，让 AI 助手在飞书中为您服务',
-      feishuAppId: '飞书 App ID',
-      feishuSecret: '飞书 App Secret',
-      getFeishuCreds: '获取飞书凭证',
-      channels: '消息通道',
-      wechat: '微信',
-      dingtalk: '钉钉',
-      language: '语言',
-      theme: '主题',
-      light: '浅色',
-      dark: '深色',
-      installing: '正在安装...',
-      configSuccess: '配置成功',
-      configFailed: '配置失败',
-      downloadNode: '下载 Node.js',
-      openclawDocs: 'OpenClaw 文档',
-      minimaxDocs: 'Minimax API',
-      deepseekDocs: 'DeepSeek API',
-      feishuDocs: '飞书开放平台',
+    en: {
+        common: enCommon,
+        settings: enSettings,
+        dashboard: enDashboard,
+        chat: enChat,
+        channels: enChannels,
+        skills: enSkills,
+        cron: enCron,
+        setup: enSetup,
     },
-  },
-  en: {
-    translation: {
-      appName: 'OpenClaw Desktop',
-      welcome: 'Welcome to OpenClaw',
-      welcomeDesc: 'One-click install and configure OpenClaw AI agents. Supports Minimax, DeepSeek and more. Easy Feishu integration.',
-      getStarted: 'Get Started',
-      checkEnv: 'Environment Check',
-      installOpenClaw: 'Install OpenClaw',
-      configure: 'Configuration',
-      done: 'Done',
-      nodeRequired: 'Node.js 20+ required',
-      nodeInstalled: 'Node.js installed',
-      nodeNotInstalled: 'Node.js not installed',
-      openclawInstalled: 'OpenClaw installed',
-      openclawNotInstalled: 'OpenClaw not installed',
-      installNow: 'Install Now',
-      skip: 'Skip',
-      next: 'Next',
-      back: 'Back',
-      finish: 'Finish',
-      modelConfig: 'Model Configuration',
-      defaultModel: 'Default Model',
-      minimax: 'Minimax',
-      deepseek: 'DeepSeek',
-      recommended: 'Recommended',
-      apiKey: 'API Key',
-      enterApiKey: 'Enter API Key',
-      feishuConfig: 'Feishu Configuration',
-      feishuPriority: 'Feishu Integration (Priority)',
-      feishuDesc: 'Connect Feishu to get AI assistant in your workspace',
-      feishuAppId: 'Feishu App ID',
-      feishuSecret: 'Feishu App Secret',
-      getFeishuCreds: 'Get Feishu Credentials',
-      channels: 'Channels',
-      wechat: 'WeChat',
-      dingtalk: 'DingTalk',
-      language: 'Language',
-      theme: 'Theme',
-      light: 'Light',
-      dark: 'Dark',
-      installing: 'Installing...',
-      configSuccess: 'Configuration successful',
-      configFailed: 'Configuration failed',
-      downloadNode: 'Download Node.js',
-      openclawDocs: 'OpenClaw Docs',
-      minimaxDocs: 'Minimax API',
-      deepseekDocs: 'DeepSeek API',
-      feishuDocs: 'Feishu Open Platform',
+    zh: {
+        common: zhCommon,
+        settings: zhSettings,
+        dashboard: zhDashboard,
+        chat: zhChat,
+        channels: zhChannels,
+        skills: zhSkills,
+        cron: zhCron,
+        setup: zhSetup,
     },
-  },
-}
+    ja: {
+        common: jaCommon,
+        settings: jaSettings,
+        dashboard: jaDashboard,
+        chat: jaChat,
+        channels: jaChannels,
+        skills: jaSkills,
+        cron: jaCron,
+        setup: jaSetup,
+    },
+};
 
-i18n.use(initReactI18next).init({
-  resources,
-  lng: 'zh',
-  fallbackLng: 'zh',
-  interpolation: {
-    escapeValue: false,
-  },
-})
+i18n
+    .use(initReactI18next)
+    .init({
+        resources,
+        lng: 'zh', // 默认简体中文，面向中国大陆用户
+        fallbackLng: 'zh',
+        defaultNS: 'common',
+        ns: ['common', 'settings', 'dashboard', 'chat', 'channels', 'skills', 'cron', 'setup'],
+        interpolation: {
+            escapeValue: false, // React already escapes
+        },
+        react: {
+            useSuspense: false,
+        },
+    });
 
-export default i18n
+export default i18n;
