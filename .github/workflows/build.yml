@@ -61,7 +61,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }}-release
-          path: release/
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*.exe
+            release/*.AppImage
+            release/*.deb
+            release/*.rpm
+            release/*.yml
+            release/*.yaml
+            release/*.blockmap
 
   release:
     needs: build
@@ -79,7 +88,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/**/*
+            artifacts/**/*.dmg
+            artifacts/**/*.zip
+            artifacts/**/*.exe
+            artifacts/**/*.AppImage
+            artifacts/**/*.deb
+            artifacts/**/*.rpm
+            artifacts/**/*.yml
+            artifacts/**/*.yaml
+            artifacts/**/*.blockmap
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

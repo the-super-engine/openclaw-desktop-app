@@ -1,8 +1,8 @@
 appId: com.openclaw.desktop
-productName: 开放龙虾宝-桌面版
+productName: OpenClaw Desktop
 copyright: Copyright © 2026 OpenClaw Desktop
 compression: maximum
-artifactName: ${productName}-${version}-${os}-${arch}.${ext}
+artifactName: openclaw-desktop-${version}-${os}-${arch}.${ext}
 
 directories:
   output: release
@@ -127,8 +127,8 @@ nsis:
   differentialPackage: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: 开放龙虾宝-桌面版
-  uninstallDisplayName: 开放龙虾宝-桌面版
+  shortcutName: OpenClaw Desktop
+  uninstallDisplayName: OpenClaw Desktop
   license: LICENSE
   include: scripts/installer.nsh
   installerIcon: resources/icons/icon.ico
@@ -158,12 +158,12 @@ linux:
   category: Utility
   maintainer: OpenClaw Desktop <openclaw@example.com>
   vendor: OpenClaw
-  synopsis: 开放龙虾宝-桌面版 - AI 智能体图形界面
-  description: 开放龙虾宝-桌面版，面向中国大陆用户，默认 Minimax，推荐 DeepSeek，飞书优先配置。
+  synopsis: OpenClaw Desktop - AI agent GUI
+  description: OpenClaw Desktop, an AI agent graphical interface tailored for users in Mainland China with Minimax by default and DeepSeek recommended.
   desktop:
     entry:
-      Name: 开放龙虾宝-桌面版
-      Comment: OpenClaw AI 智能体图形界面
+      Name: OpenClaw Desktop
+      Comment: OpenClaw AI agent GUI
       Categories: Utility;Network;
       Keywords: ai;assistant;automation;chat;
       StartupWMClass: openclaw-desktop
