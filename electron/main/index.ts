@@ -20,6 +20,7 @@ import { isQuitting, setQuitting } from './app-state';
 import { applyProxySettings } from './proxy';
 import { getSetting } from '../utils/store';
 import { ensureBuiltinSkillsInstalled } from '../utils/skill-config';
+import { stopStarOfficeBackend } from '../utils/star-office';
 
 // Disable GPU hardware acceleration globally for maximum stability across
 // all GPU configurations (no GPU, integrated, discrete).
@@ -293,6 +294,7 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   setQuitting();
+  stopStarOfficeBackend();
   // Fire-and-forget: do not await gatewayManager.stop() here.
   // Awaiting inside before-quit can stall Electron's quit sequence.
   void gatewayManager.stop().catch((err) => {

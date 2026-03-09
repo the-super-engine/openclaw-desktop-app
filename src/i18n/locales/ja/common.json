@@ -6,6 +6,7 @@
         "skills": "スキル",
         "channels": "チャンネル",
         "dashboard": "ダッシュボード",
+        "office": "ピクセルオフィス",
         "settings": "設定",
         "devConsole": "開発者コンソール"
     },
@@ -28,7 +29,8 @@
         "back": "戻る",
         "next": "次へ",
         "skip": "スキップ",
-        "restart": "再起動"
+        "restart": "再起動",
+        "retry": "再試行"
     },
     "status": {
         "running": "実行中",

@@ -6,6 +6,7 @@
         "skills": "技能",
         "channels": "频道",
         "dashboard": "仪表盘",
+        "office": "像素办公室",
         "settings": "设置",
         "devConsole": "开发者控制台"
     },
@@ -28,7 +29,8 @@
         "back": "返回",
         "next": "下一步",
         "skip": "跳过",
-        "restart": "重启"
+        "restart": "重启",
+        "retry": "重试"
     },
     "status": {
         "running": "运行中",

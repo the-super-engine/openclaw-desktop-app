@@ -55,6 +55,13 @@ import { applyProxySettings } from './proxy';
 import { proxyAwareFetch } from '../utils/proxy-fetch';
 import { getRecentTokenUsageHistory } from '../utils/token-usage';
 import { appUpdater } from './updater';
+import {
+  isStarOfficeInstalled,
+  startStarOfficeBackend,
+  stopStarOfficeBackend,
+  checkStarOfficeHealth,
+  getStarOfficeUrl,
+} from '../utils/star-office';
 
 type AppRequest = {
   id?: string;
@@ -163,6 +170,9 @@ export function registerIpcHandlers(
 
   // ClawHub handlers
   registerClawHubHandlers(clawHubService);
+
+  // Star Office handlers
+  registerStarOfficeHandlers(clawHubService);
 
   // OpenClaw handlers
   registerOpenClawHandlers(gatewayManager);
@@ -2572,6 +2582,40 @@ function registerClawHubHandlers(clawHubService: ClawHubService): void {
       return { success: false, error: String(error) };
     }
   });
+}
+
+/**
+ * Star Office UI IPC handlers
+ */
+function registerStarOfficeHandlers(clawHubService: ClawHubService): void {
+  ipcMain.handle('starOffice:isInstalled', async () => isStarOfficeInstalled());
+
+  ipcMain.handle('starOffice:install', async () => {
+    try {
+      await clawHubService.install({ slug: 'star-office-ui' });
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  });
+
+  ipcMain.handle('starOffice:start', async () => {
+    try {
+      const { url } = await startStarOfficeBackend();
+      return { success: true, url };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  });
+
+  ipcMain.handle('starOffice:stop', () => {
+    stopStarOfficeBackend();
+    return { success: true };
+  });
+
+  ipcMain.handle('starOffice:checkHealth', async () => checkStarOfficeHealth());
+
+  ipcMain.handle('starOffice:getUrl', () => getStarOfficeUrl());
 }
 
 /**

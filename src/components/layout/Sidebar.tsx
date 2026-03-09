@@ -10,6 +10,7 @@ import {
   Puzzle,
   Clock,
   Settings,
+  Building2,
   ChevronLeft,
   ChevronRight,
   Terminal,
@@ -166,6 +167,7 @@ export function Sidebar() {
     { to: '/skills', icon: <Puzzle className="h-[18px] w-[18px]" />, label: t('sidebar.skills') },
     { to: '/channels', icon: <Radio className="h-[18px] w-[18px]" />, label: t('sidebar.channels') },
     { to: '/dashboard', icon: <Home className="h-[18px] w-[18px]" />, label: t('sidebar.dashboard') },
+    { to: '/office', icon: <Building2 className="h-[18px] w-[18px]" />, label: t('sidebar.office') },
     { to: '/settings', icon: <Settings className="h-[18px] w-[18px]" />, label: t('sidebar.settings') },
   ];
 

@@ -10,6 +10,7 @@ import enChannels from './locales/en/channels.json';
 import enSkills from './locales/en/skills.json';
 import enCron from './locales/en/cron.json';
 import enSetup from './locales/en/setup.json';
+import enOffice from './locales/en/office.json';
 
 // ZH
 import zhCommon from './locales/zh/common.json';
@@ -20,6 +21,7 @@ import zhChannels from './locales/zh/channels.json';
 import zhSkills from './locales/zh/skills.json';
 import zhCron from './locales/zh/cron.json';
 import zhSetup from './locales/zh/setup.json';
+import zhOffice from './locales/zh/office.json';
 
 // JA
 import jaCommon from './locales/ja/common.json';
@@ -30,6 +32,7 @@ import jaChannels from './locales/ja/channels.json';
 import jaSkills from './locales/ja/skills.json';
 import jaCron from './locales/ja/cron.json';
 import jaSetup from './locales/ja/setup.json';
+import jaOffice from './locales/ja/office.json';
 
 export const SUPPORTED_LANGUAGES = [
     { code: 'zh', label: '简体中文' },
@@ -49,6 +52,7 @@ const resources = {
         skills: enSkills,
         cron: enCron,
         setup: enSetup,
+        office: enOffice,
     },
     zh: {
         common: zhCommon,
@@ -59,6 +63,7 @@ const resources = {
         skills: zhSkills,
         cron: zhCron,
         setup: zhSetup,
+        office: zhOffice,
     },
     ja: {
         common: jaCommon,
@@ -69,6 +74,7 @@ const resources = {
         skills: jaSkills,
         cron: jaCron,
         setup: jaSetup,
+        office: jaOffice,
     },
 };
 
@@ -79,7 +85,7 @@ i18n
         lng: 'zh', // 默认简体中文，面向中国大陆用户
         fallbackLng: 'zh',
         defaultNS: 'common',
-        ns: ['common', 'settings', 'dashboard', 'chat', 'channels', 'skills', 'cron', 'setup'],
+        ns: ['common', 'settings', 'dashboard', 'chat', 'channels', 'skills', 'cron', 'setup', 'office'],
         interpolation: {
             escapeValue: false, // React already escapes
         },

@@ -6,6 +6,7 @@
         "skills": "Skills",
         "channels": "Channels",
         "dashboard": "Dashboard",
+        "office": "Pixel Office",
         "settings": "Settings",
         "devConsole": "Developer Console"
     },
@@ -28,7 +29,8 @@
         "back": "Back",
         "next": "Next",
         "skip": "Skip",
-        "restart": "Restart"
+        "restart": "Restart",
+        "retry": "Retry"
     },
     "status": {
         "running": "Running",

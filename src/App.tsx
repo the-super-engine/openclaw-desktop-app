@@ -9,6 +9,7 @@ import { Toaster } from 'sonner';
 import i18n from './i18n';
 import { MainLayout } from './components/layout/MainLayout';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { lazy, Suspense } from 'react';
 import { Dashboard } from './pages/Dashboard';
 import { Chat } from './pages/Chat';
 import { Channels } from './pages/Channels';
@@ -16,6 +17,8 @@ import { Skills } from './pages/Skills';
 import { Cron } from './pages/Cron';
 import { Settings } from './pages/Settings';
 import { Setup } from './pages/Setup';
+
+const Office = lazy(() => import('./pages/Office').then((m) => ({ default: m.Office })));
 import { useSettingsStore } from './stores/settings';
 import { useGatewayStore } from './stores/gateway';
 import { applyGatewayTransportPreference } from './lib/api-client';
@@ -169,6 +172,14 @@ function App() {
             <Route path="/channels" element={<Channels />} />
             <Route path="/skills" element={<Skills />} />
             <Route path="/cron" element={<Cron />} />
+            <Route
+              path="/office"
+              element={
+                <Suspense fallback={<div className="flex h-full items-center justify-center">Loading...</div>}>
+                  <Office />
+                </Suspense>
+              }
+            />
             <Route path="/settings/*" element={<Settings />} />
           </Route>
         </Routes>

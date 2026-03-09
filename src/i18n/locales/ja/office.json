@@ -1,0 +1,7 @@
+{
+    "title": "ピクセルオフィス",
+    "installing": "Star Office UI をインストール中...",
+    "starting": "サービスを起動中...",
+    "openInBrowser": "ブラウザで開く",
+    "installHint": "インストールに失敗した場合は、スキルページから star-office-ui をインストールしてください"
+}

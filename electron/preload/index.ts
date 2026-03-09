@@ -109,6 +109,13 @@ const electronAPI = {
         'clawhub:uninstall',
         'clawhub:list',
         'clawhub:openSkillReadme',
+        // Star Office
+        'starOffice:isInstalled',
+        'starOffice:install',
+        'starOffice:start',
+        'starOffice:stop',
+        'starOffice:checkHealth',
+        'starOffice:getUrl',
         // UV
         'uv:check',
         'uv:install-all',
