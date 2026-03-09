@@ -221,12 +221,11 @@ function bundlePlugin(nodeModulesRoot, npmName, destDir) {
   }
 
   let realPluginPath;
-  try { realPluginPath = realpathSync(normWin(pkgPath)); } catch { realPluginPath = pkgPath; }
+  try { realPluginPath = realpathSync(pkgPath); } catch { realPluginPath = pkgPath; }
 
-  // Copy plugin package itself
-  if (existsSync(normWin(destDir))) rmSync(normWin(destDir), { recursive: true, force: true });
-  mkdirSync(normWin(destDir), { recursive: true });
-  cpSync(normWin(realPluginPath), normWin(destDir), { recursive: true, dereference: true });
+  // Copy plugin package itself (avoid normWin for cpSync - causes "Cannot overwrite directory with non-directory" on Windows)
+  if (existsSync(destDir)) rmSync(destDir, { recursive: true, force: true });
+  cpSync(realPluginPath, destDir, { recursive: true, dereference: true });
 
   // Collect transitive deps via pnpm virtual store BFS
   const collected = new Map();
@@ -258,7 +257,7 @@ function bundlePlugin(nodeModulesRoot, npmName, destDir) {
       if (name === skipPkg) continue;
       if (SKIP_PACKAGES.has(name) || SKIP_SCOPES.some(s => name.startsWith(s))) continue;
       let rp;
-      try { rp = realpathSync(normWin(fullPath)); } catch { continue; }
+      try { rp = realpathSync(fullPath); } catch { continue; }
       if (collected.has(rp)) continue;
       collected.set(rp, name);
       const depVirtualNM = getVirtualStoreNodeModules(rp);
@@ -278,8 +277,8 @@ function bundlePlugin(nodeModulesRoot, npmName, destDir) {
     copiedNames.add(pkgName);
     const d = join(destNM, pkgName);
     try {
-      mkdirSync(normWin(dirname(d)), { recursive: true });
-      cpSync(normWin(rp), normWin(d), { recursive: true, dereference: true });
+      mkdirSync(dirname(d), { recursive: true });
+      cpSync(rp, d, { recursive: true, dereference: true });
       count++;
     } catch (e) {
       console.warn(`[after-pack]   Skipped dep ${pkgName}: ${e.message}`);
@@ -340,18 +339,25 @@ exports.default = async function afterPack(context) {
     { npmName: '@soimy/dingtalk', pluginId: 'dingtalk' },
   ];
 
+  const buildPluginsRoot = join(__dirname, '..', 'build', 'openclaw-plugins');
   mkdirSync(pluginsDestRoot, { recursive: true });
   for (const { npmName, pluginId } of BUNDLED_PLUGINS) {
     const pluginDestDir = join(pluginsDestRoot, pluginId);
-    console.log(`[after-pack] Bundling plugin ${npmName} -> ${pluginDestDir}`);
-    const ok = bundlePlugin(nodeModulesRoot, npmName, pluginDestDir);
-    if (ok) {
-      const pluginNM = join(pluginDestDir, 'node_modules');
-      cleanupUnnecessaryFiles(pluginDestDir);
-      if (existsSync(pluginNM)) {
-        cleanupKoffi(pluginNM, platform, arch);
-        cleanupNativePlatformPackages(pluginNM, platform, arch);
-      }
+    const prebuiltPlugin = join(buildPluginsRoot, pluginId);
+    if (existsSync(prebuiltPlugin)) {
+      console.log(`[after-pack] Copying pre-built plugin ${pluginId} from build/...`);
+      if (existsSync(pluginDestDir)) rmSync(pluginDestDir, { recursive: true, force: true });
+      mkdirSync(dirname(pluginDestDir), { recursive: true });
+      cpSync(prebuiltPlugin, pluginDestDir, { recursive: true, dereference: true });
+    } else {
+      console.log(`[after-pack] Bundling plugin ${npmName} -> ${pluginDestDir}`);
+      if (!bundlePlugin(nodeModulesRoot, npmName, pluginDestDir)) continue;
+    }
+    const pluginNM = join(pluginDestDir, 'node_modules');
+    cleanupUnnecessaryFiles(pluginDestDir);
+    if (existsSync(pluginNM)) {
+      cleanupKoffi(pluginNM, platform, arch);
+      cleanupNativePlatformPackages(pluginNM, platform, arch);
     }
   }
 
