@@ -68,8 +68,8 @@ jobs:
             release/*.AppImage
             release/*.deb
             release/*.rpm
-            release/*.yml
-            release/*.yaml
+            release/latest*.yml
+            release/latest*.yaml
             release/*.blockmap
 
   release:
@@ -94,8 +94,8 @@ jobs:
             artifacts/**/*.AppImage
             artifacts/**/*.deb
             artifacts/**/*.rpm
-            artifacts/**/*.yml
-            artifacts/**/*.yaml
+            artifacts/**/latest*.yml
+            artifacts/**/latest*.yaml
             artifacts/**/*.blockmap
           generate_release_notes: true
         env:
