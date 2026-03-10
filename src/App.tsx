@@ -19,6 +19,7 @@ import { Settings } from './pages/Settings';
 import { Setup } from './pages/Setup';
 
 const Office = lazy(() => import('./pages/Office').then((m) => ({ default: m.Office })));
+const Agents = lazy(() => import('./pages/Agents').then((m) => ({ default: m.Agents })));
 import { useSettingsStore } from './stores/settings';
 import { useGatewayStore } from './stores/gateway';
 import { applyGatewayTransportPreference } from './lib/api-client';
@@ -170,6 +171,11 @@ function App() {
             <Route path="/" element={<Chat />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/channels" element={<Channels />} />
+            <Route path="/agents" element={
+              <Suspense fallback={<div className="flex h-full items-center justify-center">Loading...</div>}>
+                <Agents />
+              </Suspense>
+            } />
             <Route path="/skills" element={<Skills />} />
             <Route path="/cron" element={<Cron />} />
             <Route

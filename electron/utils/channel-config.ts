@@ -111,9 +111,8 @@ export async function saveChannelConfig(
         }
     }
 
-    // DingTalk is a channel plugin; make sure it's explicitly allowed.
-    // Newer OpenClaw versions may not load non-bundled plugins when allowlist is empty.
-    if (channelType === 'dingtalk') {
+    // QQBot is a channel plugin; make sure it's explicitly allowed.
+    if (channelType === 'qqbot') {
         if (!currentConfig.plugins) {
             currentConfig.plugins = {};
         }
@@ -121,8 +120,8 @@ export async function saveChannelConfig(
         const allow = Array.isArray(currentConfig.plugins.allow)
             ? currentConfig.plugins.allow as string[]
             : [];
-        if (!allow.includes('dingtalk')) {
-            currentConfig.plugins.allow = [...allow, 'dingtalk'];
+        if (!allow.includes('qqbot')) {
+            currentConfig.plugins.allow = [...allow, 'qqbot'];
         }
     }
 

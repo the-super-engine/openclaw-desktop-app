@@ -45,6 +45,14 @@ import {
   validateChannelConfig,
   validateChannelCredentials,
 } from '../utils/channel-config';
+import {
+  listAgentsSnapshot,
+  createAgent,
+  updateAgentName,
+  deleteAgentConfig,
+  assignChannelToAgent,
+  clearChannelBinding,
+} from '../utils/agent-config';
 import { checkUvInstalled, installUv, setupManagedPython } from '../utils/uv-setup';
 import { updateSkillConfig, getSkillConfig, getAllSkillConfigs } from '../utils/skill-config';
 import { whatsAppLoginManager } from '../utils/whatsapp-login';
@@ -1552,6 +1560,56 @@ function registerOpenClawHandlers(gatewayManager: GatewayManager): void {
     }
   }
 
+  async function ensureQQBotPluginInstalled(): Promise<{ installed: boolean; warning?: string }> {
+    const targetDir = join(homedir(), '.openclaw', 'extensions', 'qqbot');
+    const targetManifest = join(targetDir, 'openclaw.plugin.json');
+
+    if (existsSync(targetManifest)) {
+      logger.info('QQBot plugin already installed from local mirror');
+      return { installed: true };
+    }
+
+    const candidateSources = app.isPackaged
+      ? [
+        join(process.resourcesPath, 'openclaw-plugins', 'qqbot'),
+        join(process.resourcesPath, 'app.asar.unpacked', 'build', 'openclaw-plugins', 'qqbot'),
+        join(process.resourcesPath, 'app.asar.unpacked', 'openclaw-plugins', 'qqbot')
+      ]
+      : [
+        join(app.getAppPath(), 'build', 'openclaw-plugins', 'qqbot'),
+        join(process.cwd(), 'build', 'openclaw-plugins', 'qqbot'),
+        join(__dirname, '../../build/openclaw-plugins/qqbot'),
+      ];
+
+    const sourceDir = candidateSources.find((dir) => existsSync(join(dir, 'openclaw.plugin.json')));
+    if (!sourceDir) {
+      logger.warn('Bundled QQBot plugin mirror not found in candidate paths', { candidateSources });
+      return {
+        installed: false,
+        warning: `Bundled QQBot plugin mirror not found. Checked: ${candidateSources.join(' | ')}`,
+      };
+    }
+
+    try {
+      mkdirSync(join(homedir(), '.openclaw', 'extensions'), { recursive: true });
+      rmSync(targetDir, { recursive: true, force: true });
+      cpSync(sourceDir, targetDir, { recursive: true, dereference: true });
+
+      if (!existsSync(targetManifest)) {
+        return { installed: false, warning: 'Failed to install QQBot plugin mirror (manifest missing).' };
+      }
+
+      logger.info(`Installed QQBot plugin from bundled mirror: ${sourceDir}`);
+      return { installed: true };
+    } catch (error) {
+      logger.warn('Failed to install QQBot plugin from bundled mirror:', error);
+      return {
+        installed: false,
+        warning: 'Failed to install bundled QQBot plugin mirror',
+      };
+    }
+  }
+
   // Get OpenClaw package status
   ipcMain.handle('openclaw:status', () => {
     const status = getOpenClawStatus();
@@ -1611,6 +1669,27 @@ function registerOpenClawHandlers(gatewayManager: GatewayManager): void {
           return {
             success: false,
             error: installResult.warning || 'DingTalk plugin install failed',
+          };
+        }
+        await saveChannelConfig(channelType, config);
+        if (gatewayManager.getStatus().state !== 'stopped') {
+          logger.info(`Scheduling Gateway reload after channel:saveConfig (${channelType})`);
+          gatewayManager.debouncedReload();
+        } else {
+          logger.info(`Gateway is stopped; skip immediate reload after channel:saveConfig (${channelType})`);
+        }
+        return {
+          success: true,
+          pluginInstalled: installResult.installed,
+          warning: installResult.warning,
+        };
+      }
+      if (channelType === 'qqbot') {
+        const installResult = await ensureQQBotPluginInstalled();
+        if (!installResult.installed) {
+          return {
+            success: false,
+            error: installResult.warning || 'QQBot plugin install failed',
           };
         }
         await saveChannelConfig(channelType, config);
@@ -1726,6 +1805,62 @@ function registerOpenClawHandlers(gatewayManager: GatewayManager): void {
     } catch (error) {
       console.error('Failed to validate channel credentials:', error);
       return { success: false, valid: false, errors: [String(error)], warnings: [] };
+    }
+  });
+
+  // ==================== Agents Handlers ====================
+
+  ipcMain.handle('agents:list', async () => {
+    try {
+      return await listAgentsSnapshot();
+    } catch (error) {
+      console.error('agents:list failed:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('agents:create', async (_, name: string) => {
+    try {
+      return await createAgent(name);
+    } catch (error) {
+      console.error('agents:create failed:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('agents:update', async (_, agentId: string, name: string) => {
+    try {
+      return await updateAgentName(agentId, name);
+    } catch (error) {
+      console.error('agents:update failed:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('agents:delete', async (_, agentId: string) => {
+    try {
+      return await deleteAgentConfig(agentId);
+    } catch (error) {
+      console.error('agents:delete failed:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('agents:assignChannel', async (_, agentId: string, channelType: string) => {
+    try {
+      return await assignChannelToAgent(agentId, channelType);
+    } catch (error) {
+      console.error('agents:assignChannel failed:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('agents:removeChannel', async (_, _agentId: string, channelType: string) => {
+    try {
+      return await clearChannelBinding(channelType);
+    } catch (error) {
+      console.error('agents:removeChannel failed:', error);
+      throw error;
     }
   });
 }

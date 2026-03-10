@@ -46,6 +46,16 @@ import {
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { invokeIpc } from '@/lib/api-client';
+import qqIcon from '@/assets/channels/qq.svg';
+
+function ChannelIcon({ type, size = 'md' }: { type: ChannelType; size?: 'sm' | 'md' | 'lg' }) {
+  const sizeClass = size === 'lg' ? 'h-10 w-10' : size === 'md' ? 'h-8 w-8' : 'h-6 w-6';
+  if (type === 'qqbot') {
+    return <img src={qqIcon} alt="QQ" className={`${sizeClass} dark:invert`} />;
+  }
+  const textClass = size === 'lg' ? 'text-3xl' : size === 'md' ? 'text-2xl' : 'text-xl';
+  return <span className={textClass}>{CHANNEL_ICONS[type]}</span>;
+}
 
 export function Channels() {
   const { t } = useTranslation('channels');
@@ -316,7 +326,9 @@ export function Channels() {
                     setShowAddDialog(true);
                   }}
                 >
-                  <span className="text-3xl">{meta.icon}</span>
+                  <div className="flex items-center">
+                    <ChannelIcon type={type} size="lg" />
+                  </div>
                   <p className="font-medium mt-2">{meta.name}</p>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                     {t(meta.description)}
@@ -394,9 +406,7 @@ function ChannelCard({ channel, onDelete }: ChannelCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">
-              {CHANNEL_ICONS[channel.type]}
-            </span>
+            <ChannelIcon type={channel.type} />
             <div>
               <CardTitle className="text-base">{channel.name}</CardTitle>
               <CardDescription className="text-xs">

@@ -296,6 +296,25 @@
                 "创建一个新的 Bot 账户",
                 "复制访问令牌"
             ]
+        },
+        "qqbot": {
+            "description": "通过 OpenClaw 渠道插件连接 QQ 机器人",
+            "docsUrl": "https://github.com/sliverp/qqbot",
+            "fields": {
+                "appId": {
+                    "label": "应用 ID (AppID)",
+                    "placeholder": "您的 QQ 机器人 AppID"
+                },
+                "clientSecret": {
+                    "label": "应用密钥 (AppSecret)",
+                    "placeholder": "您的 QQ 机器人 AppSecret"
+                }
+            },
+            "instructions": [
+                "打开 QQ 开放平台 https://q.qq.com/",
+                "创建 QQ 机器人应用",
+                "获取 AppID 和 AppSecret 并填写下方"
+            ]
         }
     },
     "viewDocs": "查看文档"

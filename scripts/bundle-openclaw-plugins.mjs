@@ -31,6 +31,7 @@ function normWin(p) {
 
 const PLUGINS = [
   { npmName: '@soimy/dingtalk', pluginId: 'dingtalk' },
+  { npmName: '@sliverp/qqbot', pluginId: 'qqbot' },
 ];
 
 function getVirtualStoreNodeModules(realPkgPath) {

@@ -296,6 +296,25 @@
                 "Create a new Bot Account",
                 "Copy the access token"
             ]
+        },
+        "qqbot": {
+            "description": "Connect QQ Bot via OpenClaw channel plugin",
+            "docsUrl": "https://github.com/sliverp/qqbot",
+            "fields": {
+                "appId": {
+                    "label": "App ID (AppID)",
+                    "placeholder": "Your QQ Bot AppID"
+                },
+                "clientSecret": {
+                    "label": "App Secret (AppSecret)",
+                    "placeholder": "Your QQ Bot AppSecret"
+                }
+            },
+            "instructions": [
+                "Open QQ Open Platform at https://q.qq.com/",
+                "Create a QQ Bot application",
+                "Get AppID and AppSecret and fill in below"
+            ]
         }
     },
     "viewDocs": "View Documentation"

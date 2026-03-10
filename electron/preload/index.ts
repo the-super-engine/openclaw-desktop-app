@@ -98,8 +98,14 @@ const electronAPI = {
         'channel:listConfigured',
         'channel:setEnabled',
         'channel:validate',
-        'channel:validate',
         'channel:validateCredentials',
+        // Agents
+        'agents:list',
+        'agents:create',
+        'agents:update',
+        'agents:delete',
+        'agents:assignChannel',
+        'agents:removeChannel',
         // WhatsApp
         'channel:requestWhatsAppQr',
         'channel:cancelWhatsAppQr',
