@@ -49,6 +49,9 @@ jobs:
         run: pnpm run icons
 
       - name: Build & Package
+        env:
+          # Skip macOS code signing (avoids isbinaryfile crash on large bundles in CI)
+          CSC_IDENTITY_AUTO_DISCOVERY: false
         shell: bash
         run: |
           case "${{ matrix.platform }}" in
