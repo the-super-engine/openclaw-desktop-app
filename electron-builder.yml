@@ -56,6 +56,9 @@ publish:
 
 # macOS Configuration
 mac:
+  # Disable code signing entirely in CI (avoids isbinaryfile crash on large bundles).
+  # ARM users may need to run: xattr -cr /path/to/App.app
+  identity: null
   extraResources:
     - from: resources/bin/darwin-${arch}
       to: bin
